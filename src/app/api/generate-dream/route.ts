@@ -14,9 +14,10 @@ export async function POST(request: NextRequest) {
     // Enhanced prompt for surreal dream-like artwork
     const enhancedPrompt = `${dreamText}, surreal dreamlike digital painting, ethereal, mystical, surrealist art, soft lighting, vivid colors, dream-like atmosphere, high quality digital art, artstation trending, fantasy art, magical realism, 8k, masterpiece`;
 
-    // Use Pollinations.ai direct URL-based generation (no API key required)
+    // Use Pollinations.ai direct URL-based generation with parameters
     const encodedPrompt = encodeURIComponent(enhancedPrompt);
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}`;
+    const seed = Date.now(); // Unique seed for each generation
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&seed=${seed}&nologo=true`;
 
     return NextResponse.json({
       imageUrl,

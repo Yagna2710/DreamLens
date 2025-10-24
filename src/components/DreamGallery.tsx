@@ -1,6 +1,7 @@
 'use client';
 
-import { Download, Calendar, Type } from 'lucide-react';
+import { useState } from 'react';
+import { Download, Calendar, Type, Loader2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 
@@ -16,6 +17,18 @@ interface DreamGalleryProps {
 }
 
 export default function DreamGallery({ artworks }: DreamGalleryProps) {
+  const [loadingImages, setLoadingImages] = useState<Record<string, boolean>>({});
+  const [errorImages, setErrorImages] = useState<Record<string, boolean>>({});
+
+  const handleImageLoad = (id: string) => {
+    setLoadingImages(prev => ({ ...prev, [id]: false }));
+  };
+
+  const handleImageError = (id: string) => {
+    setLoadingImages(prev => ({ ...prev, [id]: false }));
+    setErrorImages(prev => ({ ...prev, [id]: true }));
+  };
+
   const handleDownload = async (imageUrl: string, dreamText: string) => {
     try {
       const response = await fetch(imageUrl);
@@ -48,12 +61,26 @@ export default function DreamGallery({ artworks }: DreamGalleryProps) {
             key={artwork.id}
             className="group overflow-hidden bg-white/10 dark:bg-black/20 backdrop-blur-lg border-white/20 hover:border-purple-400/50 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/20"
           >
-            <div className="relative aspect-square overflow-hidden">
-              <img
-                src={artwork.imageUrl}
-                alt={artwork.dreamText}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
+            <div className="relative aspect-square overflow-hidden bg-purple-900/20">
+              {loadingImages[artwork.id] !== false && !errorImages[artwork.id] && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Loader2 className="h-8 w-8 text-purple-400 animate-spin" />
+                </div>
+              )}
+              {errorImages[artwork.id] ? (
+                <div className="absolute inset-0 flex items-center justify-center text-red-400">
+                  <p>Failed to load image</p>
+                </div>
+              ) : (
+                <img
+                  src={artwork.imageUrl}
+                  alt={artwork.dreamText}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  onLoad={() => handleImageLoad(artwork.id)}
+                  onError={() => handleImageError(artwork.id)}
+                  loading="lazy"
+                />
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <Button
                 onClick={() => handleDownload(artwork.imageUrl, artwork.dreamText)}
